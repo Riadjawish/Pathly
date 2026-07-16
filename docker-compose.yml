@@ -1,0 +1,98 @@
+name: pathly
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pathly}
+      POSTGRES_USER: ${POSTGRES_USER:-pathly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pathly_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pathly} -d ${POSTGRES_DB:-pathly}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - pathly
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pathly}:${POSTGRES_PASSWORD:-pathly_dev_password}@postgres:5432/${POSTGRES_DB:-pathly}
+      STORAGE_BACKEND: local
+      LOCAL_STORAGE_PATH: /data/uploads
+      CHROMA_PATH: /data/chroma
+    command: >-
+      sh -c "alembic upgrade head &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - uploads_data:/data/uploads
+      - chroma_data:/data/chroma
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - pathly
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      target: development
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+      WATCHPACK_POLLING: "true"
+    command: npm run dev -- --hostname 0.0.0.0
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - web_node_modules:/app/node_modules
+      - web_next_cache:/app/.next
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - pathly
+
+volumes:
+  postgres_data:
+  uploads_data:
+  chroma_data:
+  web_node_modules:
+  web_next_cache:
+
+networks:
+  pathly:
+    driver: bridge

@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pathly
 
-## Getting Started
+Pathly turns a student's PDFs, notes, slides, practice problems, and past exams
+into a source-grounded mastery journey. The interface is a playful course map;
+the backend handles identity, materials, Gemini RAG, quizzes, progress, study
+streaks, and friends.
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+Next.js 16 web app
+        │ typed REST client
+        ▼
+FastAPI /api/v1
+   ├── PostgreSQL + SQLAlchemy + Alembic  (users, courses, maps, progress)
+   ├── Local object storage               (S3-ready boundary)
+   ├── document extraction + chunking     (PDF, DOCX, PPTX, TXT, Markdown)
+   ├── Gemini generation + embeddings
+   └── Chroma vector search               (source-grounded retrieval)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Gemini credentials stay on the API server. Browser clients receive short-lived
+JWT access tokens; rotating refresh tokens are hashed in the database.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Run the complete stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The easiest development setup uses Docker Desktop:
 
-## Learn More
+```bash
+cp .env.example .env
+# Fill SECRET_KEY, GEMINI_API_KEY, and GOOGLE_CLIENT_ID.
+docker compose up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+- Web app: <http://localhost:3000>
+- API docs: <http://localhost:8000/docs>
+- API health: <http://localhost:8000/api/v1/health>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For running PostgreSQL, FastAPI, and Next.js separately, see
+[BACKEND_SETUP.md](BACKEND_SETUP.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development checks
 
-## Deploy on Vercel
+```bash
+npm run lint
+npm run build
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+cd backend
+.venv/bin/pytest -q
+.venv/bin/ruff check .
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API coverage
+
+- Email/password registration, Google ID-token sign-in, access/refresh/logout
+- Profile, university, course, goals, and friends
+- Subject CRUD with synchronized theme, icon, progress, and topic counts
+- Secure multi-file uploads and background extraction/indexing
+- Generated mastery paths, progress-based unlocks, boss levels, and study streaks
+- Source-grounded summaries, tutor chat, quizzes, grading, hints, and recommendations
+- Progress summary/history with source and quiz records
+
+The interactive OpenAPI page documents all request and response shapes.
+
+## Repository layout
+
+```text
+app/                 Next.js App Router frontend
+backend/app/         FastAPI routes, models, and services
+backend/alembic/     database migrations
+backend/tests/       API, auth, storage, and chunking tests
+docker-compose.yml   web + API + PostgreSQL development stack
+```

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pathly pencil logo">
+  <defs>
+    <radialGradient id="bg" cx="55%" cy="42%" r="72%"><stop offset="0" stop-color="#3b1b4d"/><stop offset="1" stop-color="#24102f"/></radialGradient>
+    <linearGradient id="yellow" x1="0" x2="1"><stop stop-color="#efad1d"/><stop offset=".5" stop-color="#ffc94b"/><stop offset="1" stop-color="#d88a0c"/></linearGradient>
+    <linearGradient id="pink" x1="0" x2="1"><stop stop-color="#f3a0a7"/><stop offset=".5" stop-color="#ffbec0"/><stop offset="1" stop-color="#d77984"/></linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5b887"/><stop offset="1" stop-color="#a66f4d"/></linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".35" stop-color="#777"/><stop offset=".58" stop-color="#f4f4f4"/><stop offset="1" stop-color="#575757"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#100718" flood-opacity=".55"/></filter>
+  </defs>
+  <rect x="20" y="20" width="472" height="472" rx="116" fill="url(#bg)"/>
+  <g filter="url(#shadow)" transform="translate(0 22) scale(1 .82)">
+    <rect x="190" y="112" width="132" height="94" rx="35" fill="url(#pink)"/>
+    <rect x="181" y="184" width="150" height="54" rx="21" fill="url(#metal)"/>
+    <path d="M190 220h132v176c0 18-10 28-21 46l-34 51c-6 9-16 9-22 0l-34-51c-11-18-21-28-21-46z" fill="url(#yellow)"/>
+    <path d="M190 374c20 28 33 1 44 22 11 22 22 22 33 0 11-21 24 6 55-22v29c0 14-9 27-21 45l-34 50c-6 9-16 9-22 0l-34-50c-12-18-21-31-21-45z" fill="url(#wood)"/>
+    <path d="M242 493l14 19 14-19-8-22h-12z" fill="#30352d"/>
+    <path d="M211 230v156" stroke="#ffd968" stroke-width="12" stroke-linecap="round" opacity=".55"/>
+  </g>
+</svg>

@@ -1,0 +1,1 @@
+"""Pathly API route modules."""

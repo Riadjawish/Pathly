@@ -1,0 +1,16 @@
+.git
+.gitignore
+.DS_Store
+.env
+.env.*
+!.env.example
+.next
+node_modules
+npm-debug.log*
+coverage
+backend/.venv
+backend/.pytest_cache
+backend/.ruff_cache
+backend/**/__pycache__
+backend/data
+data
