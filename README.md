@@ -1,9 +1,33 @@
 # Pathly
 
-Pathly turns a student's PDFs, notes, slides, practice problems, and past exams
-into a source-grounded mastery journey. The interface is a playful course map;
-the backend handles identity, materials, Gemini RAG, quizzes, progress, study
-streaks, and friends.
+**AI study platform that turns your course material into a Duolingo-style mastery path.**
+
+🔗 **Live demo:** https://pathly-drab.vercel.app
+📘 **API docs:** https://pathly-api-production.up.railway.app/docs
+
+Upload lecture slides, notes, past exams, and practice problems for a course.
+Pathly reads all of it as one syllabus, works out the prerequisite chain
+between topics — teaching foundational concepts the material assumes but
+never explains — and builds a level-by-level path from zero knowledge to
+being ready for the hardest questions in your own exam material. Each level
+mixes concise notes, worked examples, and a mini-quiz gating progress to the
+next one.
+
+## Features
+
+- **Full auth**: email/password, Google Sign-In, password reset, email verification
+- **AI-generated mastery paths**: Gemini reads your uploaded material via RAG (chunking + embeddings + Chroma vector search), decides how many levels a course actually needs, and sequences them by prerequisite
+- **Source-grounded content** with the freedom to teach real prerequisites your material doesn't cover, so nothing has a gap
+- **Mastery gating**: a level only unlocks the next one once its mini-quiz is answered correctly
+- **AI tutor chat and standalone practice quizzes**, both grounded in your uploaded material with cited sources
+- **Progress tracking** per subject, with study streaks
+
+## Tech stack
+
+**Frontend** — Next.js 16 (App Router), TypeScript, React
+**Backend** — FastAPI, SQLAlchemy 2 (async), Alembic, PostgreSQL
+**AI/RAG** — Google Gemini (generation + embeddings), ChromaDB vector search
+**Infra** — Docker, deployed on Vercel (web) + Railway (API + Postgres)
 
 ## Architecture
 
@@ -12,7 +36,7 @@ Next.js 16 web app
         │ typed REST client
         ▼
 FastAPI /api/v1
-   ├── PostgreSQL + SQLAlchemy + Alembic  (users, courses, maps, progress)
+   ├── PostgreSQL + SQLAlchemy + Alembic  (users, subjects, mastery paths, progress)
    ├── Local object storage               (S3-ready boundary)
    ├── document extraction + chunking     (PDF, DOCX, PPTX, TXT, Markdown)
    ├── Gemini generation + embeddings
@@ -22,7 +46,7 @@ FastAPI /api/v1
 Gemini credentials stay on the API server. Browser clients receive short-lived
 JWT access tokens; rotating refresh tokens are hashed in the database.
 
-## Run the complete stack
+## Run it locally
 
 The easiest development setup uses Docker Desktop:
 
@@ -52,11 +76,11 @@ cd backend
 
 ## API coverage
 
-- Email/password registration, Google ID-token sign-in, access/refresh/logout
+- Email/password registration, Google ID-token sign-in, password reset, email verification, access/refresh/logout
 - Profile, university, course, goals, and friends
 - Subject CRUD with synchronized theme, icon, progress, and topic counts
 - Secure multi-file uploads and background extraction/indexing
-- Generated mastery paths, progress-based unlocks, boss levels, and study streaks
+- AI-generated mastery paths with prerequisite sequencing, mastery-gated levels, and boss levels
 - Source-grounded summaries, tutor chat, quizzes, grading, hints, and recommendations
 - Progress summary/history with source and quiz records
 
